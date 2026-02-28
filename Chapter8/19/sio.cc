@@ -1,9 +1,12 @@
-#include<cstdlib>
-#include<cstdio>
-#include<cerrno>
-#include<cstring>
-#include<unistd.h>
-#include<csignal>
+// #include<cstdlib>
+// #include<cstdio>
+// #include<cerrno>
+// #include<cstring>
+// #include<unistd.h>
+// #include<csignal>
+#include"sio.h"
+
+volatile sig_atomic_t flag;
 
 size_t sio_strlen(char s[])
 {
@@ -42,7 +45,7 @@ void sio_ltoa(long v,char s[],int base)
         /* code */
         cur=v%base;
         s[i++]=(cur<10)?cur+'0':cur-10+'a';
-    } while ((v/=base)=0);
+    } while ((v/=base)!=0);
     if(if_neg)
         s[i++]='-';
     s[i]='\0';
@@ -70,14 +73,16 @@ void sio_error(char s[])
 
 void signal_handler1(int sig)
 {
-    char s[]="Caught SIGINT\n";
+    char s[]="Caught SIGINTa\n";
     sio_puts(s);
+    // sio_putl(100);
+    // sio_puts(s);
     _exit(0);
 }
 
-int main()
-{
-    signal(SIGINT,signal_handler1);
-    sleep(10);
-    return 0;
-}
+// int main()
+// {
+//     signal(SIGINT,signal_handler1);
+//     sleep(10);
+//     return 0;
+// }
