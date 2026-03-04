@@ -8,7 +8,7 @@
 
 volatile sig_atomic_t flag;
 
-size_t sio_strlen(char s[])
+size_t sio_strlen(const char s[])
 {
     size_t l=0;
     while(s[l]!='\0')
@@ -53,7 +53,7 @@ void sio_ltoa(long v,char s[],int base)
     return;
 }
 
-ssize_t sio_puts(char s[])
+ssize_t sio_puts(const char s[])
 {
     return write(STDOUT_FILENO,s,sio_strlen(s));
 }
@@ -65,7 +65,7 @@ ssize_t sio_putl(long v)
     return sio_puts(s);
 }
 
-void sio_error(char s[])
+void sio_error(const char s[])
 {
     write(STDERR_FILENO,s,sio_strlen(s));
     _exit(1);
