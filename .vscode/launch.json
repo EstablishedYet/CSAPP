@@ -26,6 +26,18 @@
             "MIMode": "gdb",
             "preLaunchTask": "build echo_server"
         },
+        {
+            "name": "Debug tiny",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/established/CSAPP/Chapter11/7/tiny.out",
+            "args": [
+                "8088"
+            ],
+            "cwd": "/home/established/CSAPP/Chapter11/7",
+            "MIMode": "gdb",
+            "preLaunchTask": "build tiny"
+        },
         // {
         //     "name": "(gdb) Launch",
         //     "type": "cppdbg",

@@ -38,6 +38,25 @@
                 "kind": "build"
             }
         },
+        {
+            "label": "build tiny",
+            "type": "shell",
+            "command": "g++",
+            "args": [
+                "-g",
+                "/home/established/CSAPP/Chapter11/7/tiny_browser.cc",
+                "/home/established/CSAPP/Chapter11/6/my_socket_helpers.cc",
+                "/home/established/CSAPP/Chapter10/2/robust_io.cc",
+                "-o",
+                "/home/established/CSAPP/Chapter11/7/tiny.out"
+            ],
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build"
+            }
+        },
         // {
         //     "type": "cppbuild",
         //     "label": "C/C++: g++ build active file",
