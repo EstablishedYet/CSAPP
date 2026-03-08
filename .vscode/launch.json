@@ -1,0 +1,54 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug echo_client",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/established/CSAPP/Chapter11/6/echo_client.out",
+            "args": [
+                "127.0.0.1",
+                "8080"
+            ],
+            "cwd": "${workspaceFolder}",
+            "MIMode": "gdb",
+            "preLaunchTask": "build echo_client"
+        },
+        {
+            "name": "Debug echo_server",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/established/CSAPP/Chapter11/6/echo_server.out",
+            "args": [
+                "8080"
+            ],
+            "cwd": "${workspaceFolder}",
+            "MIMode": "gdb",
+            "preLaunchTask": "build echo_server"
+        },
+        // {
+        //     "name": "(gdb) Launch",
+        //     "type": "cppdbg",
+        //     "request": "launch",
+        //     "program": "enter program name, for example ${workspaceFolder}/a.out",
+        //     "args": [],
+        //     "stopAtEntry": false,
+        //     "cwd": "${fileDirname}",
+        //     "environment": [],
+        //     "externalConsole": false,
+        //     "MIMode": "gdb",
+        //     "setupCommands": [
+        //         {
+        //             "description": "Enable pretty-printing for gdb",
+        //             "text": "-enable-pretty-printing",
+        //             "ignoreFailures": true
+        //         },
+        //         {
+        //             "description": "Set Disassembly Flavor to Intel",
+        //             "text": "-gdb-set disassembly-flavor intel",
+        //             "ignoreFailures": true
+        //         }
+        //     ]
+        // }
+    ]
+}

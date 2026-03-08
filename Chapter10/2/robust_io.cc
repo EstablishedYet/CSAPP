@@ -1,5 +1,11 @@
 #include"robust_io.h"
 
+void unix_error(const char *msg)
+{
+    fprintf(stderr,"%s\n",msg);
+    exit(1);
+}
+
 ssize_t rio_readn(int fd,void *buf,size_t n)
 {
     size_t nleft=n;
@@ -25,7 +31,7 @@ ssize_t rio_readn(int fd,void *buf,size_t n)
     return n-nleft;
 }
 
-ssize_t rio_writen(int fd,const void *buf,size_t n)
+ssize_t rio_writen(int fd,void *buf,size_t n)
 {
     const char *buf_p=(const char *)buf;
     ssize_t nwrite;
@@ -68,7 +74,7 @@ ssize_t rio_read(rio_t *rp,void *usrbuf,size_t n)
 {
     while(rp->rio_cnt==0)
     {
-        rp->rio_cnt=read(rp->rio_fd,rp->rio_buf,RIO_BUFSIZE);
+        rp->rio_cnt=read(rp->rio_fd,rp->rio_buf,sizeof(rp->rio_buf));
         if(rp->rio_cnt<0)
         {
             if(errno!=EINTR)
@@ -78,10 +84,10 @@ ssize_t rio_read(rio_t *rp,void *usrbuf,size_t n)
         {
             if(rp->rio_cnt==0)
                 return 0;
-            // else
-            // {
-            //     rp->rio_bufptr=rp->rio_buf;
-            // }
+            else
+            {
+                rp->rio_bufptr=rp->rio_buf;
+            }
         }
     }
     n=(n>rp->rio_cnt)?rp->rio_cnt:n;
@@ -123,7 +129,7 @@ ssize_t rio_readlineb(rio_t *rp,void *buf,size_t maxlen)
     char ch;
     while(leftlen>1)
     {
-        if((byteread=rio_read(rp,buf_p,1))<0)
+        if((byteread=rio_read(rp,&ch,1))<0)
         {
             return -1;
         }
@@ -141,14 +147,56 @@ ssize_t rio_readlineb(rio_t *rp,void *buf,size_t maxlen)
             }
         }
         // ch=*buf_p;
-        buf_p+=byteread;
-        leftlen-=byteread;
+        *buf_p=ch;
+        
         if(*buf_p=='\n')
         {
+            buf_p+=byteread;
+            leftlen-=byteread;
             break;
         }
+        buf_p+=byteread;
+        leftlen-=byteread;
     }
     *(buf_p)=0;
-    leftlen--;
+    // leftlen--;
     return maxlen-leftlen;
+}
+
+ssize_t Rio_readn(int fd,void *buf,size_t n)
+{
+    ssize_t rc;
+    if((rc=rio_readn(fd,buf,n))<0)
+    {
+        unix_error("rio_readn error");
+    }
+    return rc;
+}
+ssize_t Rio_writen(int fd,void *buf,size_t n)
+{
+    ssize_t rc;
+    if((rc=rio_writen(fd,buf,n))<0)
+    {
+        unix_error("rio_writen error");
+    }
+    return rc;
+}
+// ssize_t Rio_read(rio_t *rp,void *usrbuf,size_t n);
+ssize_t Rio_readnb(rio_t *rp,void *buf,size_t n)
+{
+    ssize_t rc;
+    if((rc=rio_readnb(rp,buf,n))<0)
+    {
+        unix_error("rio_readnb error");
+    }
+    return rc;
+}
+ssize_t Rio_readlineb(rio_t *rp,void *buf,size_t maxlen)
+{
+    ssize_t rc;
+    if((rc=rio_readlineb(rp,buf,maxlen))<0)
+    {
+        unix_error("rio_readlineb error");
+    }
+    return rc;
 }

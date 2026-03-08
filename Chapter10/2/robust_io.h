@@ -20,8 +20,17 @@ ssize_t rio_readn(int fd,void *buf,size_t n);
 ssize_t rio_writen(int fd,void *buf,size_t n);
 
 void rio_readinitb(rio_t *rp,int fd);
+
 ssize_t rio_read(rio_t *rp,void *usrbuf,size_t n);
 ssize_t rio_readnb(rio_t *rp,void *buf,size_t n);
 ssize_t rio_readlineb(rio_t *rp,void *buf,size_t maxlen);
+
+ssize_t Rio_readn(int fd,void *buf,size_t n);
+ssize_t Rio_writen(int fd,void *buf,size_t n);
+// ssize_t Rio_read(rio_t *rp,void *usrbuf,size_t n);
+ssize_t Rio_readnb(rio_t *rp,void *buf,size_t n);
+ssize_t Rio_readlineb(rio_t *rp,void *buf,size_t maxlen);
+
+void unix_error(const char *msg);
 
 #endif
