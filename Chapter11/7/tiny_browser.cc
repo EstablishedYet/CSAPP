@@ -206,13 +206,13 @@ void serve_dynamic(int fd,char *filename,char *cgiargs)
         clienterror(fd,filename,"403","Forbidden","Tiny couldn't execute the file");
         return;
     }
-    dup2(fd,1);
     char header[MAXLINE];
     char *emptylist[]={NULL};
-    sprintf(header,"HTTP/1.0 200 OK\r\n");
-    Rio_writen(fd,header,strlen(header));
     if(fork()==0)
     {
+        dup2(fd,1);
+        sprintf(header,"HTTP/1.0 200 OK\r\n");
+        Rio_writen(fd,header,strlen(header));
         setenv("QUERY_STRING",cgiargs,1);
         execve(filename,emptylist,environ);
         close(fd);
