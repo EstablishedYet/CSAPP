@@ -40,13 +40,13 @@ ssize_t rio_writen(int fd,void *buf,size_t n)
     {
         if((nwrite=write(fd,buf_p,nleft))<0)
         {
-            if(errno=EINTR)
+            if(errno==EINTR)
             {
                 nwrite=0;
             }
             else
             {
-                return -1;
+                return -2;
             }
         }
         // else
@@ -175,7 +175,7 @@ ssize_t Rio_readn(int fd,void *buf,size_t n)
 ssize_t Rio_writen(int fd,void *buf,size_t n)
 {
     ssize_t rc;
-    if((rc=rio_writen(fd,buf,n))<0)
+    if((rc=rio_writen(fd,buf,n))==-1)
     {
         unix_error("rio_writen error");
     }

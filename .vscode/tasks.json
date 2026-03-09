@@ -47,6 +47,7 @@
                 "/home/established/CSAPP/Chapter11/7/tiny_browser.cc",
                 "/home/established/CSAPP/Chapter11/6/my_socket_helpers.cc",
                 "/home/established/CSAPP/Chapter10/2/robust_io.cc",
+                "/home/established/CSAPP/Chapter8/19_sio/sio.cc",
                 "-o",
                 "/home/established/CSAPP/Chapter11/7/tiny.out"
             ],

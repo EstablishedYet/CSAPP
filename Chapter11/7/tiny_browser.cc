@@ -4,6 +4,8 @@
 #include<sys/stat.h>
 #include<fcntl.h>
 #include<wait.h>
+#include<csignal>
+#include"/home/established/CSAPP/Chapter8/19_sio/sio.h"
 
 void doit(int fd);
 void read_requesthdrs(rio_t *rp);
@@ -13,8 +15,16 @@ void get_filetype(char *filename,char *filetype);
 void serve_dynamic(int fd,char *filename,char *cgiargs);
 void clienterror(int fd,const char *cause,const char *errnum,const char *shortmsg,const char *longmsg);
 
+void handler1(int sig)
+{
+    sio_puts("Caught SIGPIPE\n");
+    return;
+}
+
+
 int main(int argc,char **argv)
 {
+    signal(SIGPIPE,handler1);
     if(argc!=2)
     {
         fprintf(stderr,"usage: %s <port>",argv[0]);
@@ -52,7 +62,8 @@ void doit(int fd)
     rio_t rio;
     rio_readinitb(&rio,fd);
     char header[MAXLINE];
-    Rio_readlineb(&rio,header,MAXLINE);
+    int rc_rlb;
+    rc_rlb=Rio_readlineb(&rio,header,MAXLINE);
     char uri[MAXLINE],filename[MAXLINE],cgiargs[MAXLINE],func[MAXLINE];
     sscanf(header,"%s %s",func,uri);
     if(strcmp(func,"GET"))
@@ -121,9 +132,9 @@ int parse_uri(char *uri,char *filename,char *cgiargs)
     }
     strcpy(filename,".");
     strcat(filename,uri);
-    if(!strcmp(filename,"/"))
+    if(!strcmp(filename,"./"))
     {
-        strcpy(filename,"/index.html");
+        strcpy(filename,"./index.html");
     }
     return if_static;
 }
@@ -131,7 +142,11 @@ int parse_uri(char *uri,char *filename,char *cgiargs)
 void serve_static(int fd,char *filename)
 {
     struct stat filestat;
-    stat(filename,&filestat);
+    if(stat(filename,&filestat)!=0)
+    {
+        clienterror(fd,filename,"404","Not Found","There is no such file in the Tiny");
+        return;
+    }
     if(!S_ISREG(filestat.st_mode)||!(S_IRUSR&filestat.st_mode))
     {
         clienterror(fd,filename,"403","Forbidden","Tiny couldn't read the file");
@@ -144,14 +159,16 @@ void serve_static(int fd,char *filename)
     sprintf(header,"HTTP/1.0 200 OK\r\n");
     sprintf(header,"%sConnection: close\r\n",header);
     sprintf(header,"%sContent-Length: %d\r\n",header,filesize);
-    sprintf(header,"%sConnect-Type: %s\r\n\r\n",header,filetype);
+    sprintf(header,"%sContent-Type: %s\r\n\r\n",header,filetype);
     Rio_writen(fd,header,strlen(header));
     int filefd=open(filename,O_RDONLY,0);
     char buf[filesize];
-    rio_t filerio;
-    rio_readinitb(&filerio,filefd);
+    // rio_t filerio;
+    // rio_readinitb(&filerio,filefd);
     Rio_readn(filefd,buf,filesize);
-    Rio_writen(fd,buf,filesize);
+    int rc;
+    rc=Rio_writen(fd,buf,filesize);
+    close(filefd);
     // while((Rio_readlineb(&filerio,buf,MAXLINE)))
     // {
     //     Rio_writen(fd,buf,strlen(buf));
@@ -178,7 +195,12 @@ void get_filetype(char *filename,char *filetype)
 void serve_dynamic(int fd,char *filename,char *cgiargs)
 {
     struct stat filestat;
-    stat(filename,&filestat);
+    // stat(filename,&filestat);
+    if(stat(filename,&filestat)!=0)
+    {
+        clienterror(fd,filename,"404","Not Found","There is no such file in the Tiny");
+        return;
+    }
     if(!S_ISREG(filestat.st_mode)||!(S_IXUSR&filestat.st_mode))
     {
         clienterror(fd,filename,"403","Forbidden","Tiny couldn't execute the file");
