@@ -21,10 +21,20 @@ void handler1(int sig)
     return;
 }
 
+void handler2(int sig)
+{
+    int prev_error=errno;
+    while(waitpid(-1,NULL,WNOHANG)>0)
+    {
+    }
+    errno=prev_error;
+}
+
 
 int main(int argc,char **argv)
 {
     signal(SIGPIPE,handler1);
+    signal(SIGCHLD,handler2);
     if(argc!=2)
     {
         fprintf(stderr,"usage: %s <port>",argv[0]);
@@ -51,7 +61,13 @@ int main(int argc,char **argv)
             unix_error("getnameinfo error");
         }
         printf("Connected with %s:%s\n",ch_host,ch_serv);
-        doit(connectfd);
+        if(fork()==0)
+        {
+            close(listenfd);
+            doit(connectfd);
+            close(connectfd);
+            exit(0);
+        }
         close(connectfd);
     }
     exit(0);

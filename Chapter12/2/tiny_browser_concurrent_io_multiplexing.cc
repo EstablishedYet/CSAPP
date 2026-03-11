@@ -6,6 +6,7 @@
 #include<wait.h>
 #include<csignal>
 #include"/home/established/CSAPP/Chapter8/19_sio/sio.h"
+#include<sys/select.h>
 
 void doit(int fd);
 void read_requesthdrs(rio_t *rp);
@@ -14,6 +15,7 @@ void serve_static(int fd,char *filename);
 void get_filetype(char *filename,char *filetype);
 void serve_dynamic(int fd,char *filename,char *cgiargs);
 void clienterror(int fd,const char *cause,const char *errnum,const char *shortmsg,const char *longmsg);
+void command();
 
 void handler1(int sig)
 {
@@ -21,10 +23,21 @@ void handler1(int sig)
     return;
 }
 
+void handler2(int sig)
+{
+    int prev_error=errno;
+    while(waitpid(-1,NULL,WNOHANG)>0)
+    {
+    }
+    errno=prev_error;
+}
+
 
 int main(int argc,char **argv)
 {
+    fd_set read_set,ready_set;
     signal(SIGPIPE,handler1);
+    signal(SIGCHLD,handler2);
     if(argc!=2)
     {
         fprintf(stderr,"usage: %s <port>",argv[0]);
@@ -39,20 +52,37 @@ int main(int argc,char **argv)
     {
         unix_error("open_listenfd error");
     }
+    FD_SET(STDIN_FILENO,&read_set);
+    FD_SET(listenfd,&read_set);
     while(true)
     {
-        connectfd=accept(listenfd,(sockaddr *)&sock,&sock_len);
-        if(connectfd<0)
+        ready_set=read_set;
+        select(listenfd+1,&ready_set,NULL,NULL,NULL);
+        if(FD_ISSET(listenfd,&ready_set))
         {
-            unix_error("accept error");;
+            connectfd=accept(listenfd,(sockaddr *)&sock,&sock_len);
+            if(connectfd<0)
+            {
+                unix_error("accept error");;
+            }
+            if(getnameinfo((sockaddr *)&sock,sock_len,ch_host,MAXLINE,ch_serv,MAXLINE,0))
+            {
+                unix_error("getnameinfo error");
+            }
+            printf("Connected with %s:%s\n",ch_host,ch_serv);
+            if(fork()==0)
+            {
+                close(listenfd);
+                doit(connectfd);
+                close(connectfd);
+                exit(0);
+            }
+            close(connectfd);
         }
-        if(getnameinfo((sockaddr *)&sock,sock_len,ch_host,MAXLINE,ch_serv,MAXLINE,0))
+        if(FD_ISSET(STDIN_FILENO,&ready_set))
         {
-            unix_error("getnameinfo error");
+            command();
         }
-        printf("Connected with %s:%s\n",ch_host,ch_serv);
-        doit(connectfd);
-        close(connectfd);
     }
     exit(0);
 }
